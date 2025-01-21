@@ -1,15 +1,22 @@
+libname IPEDS '~/IPEDS';
+libname GITHUB '~/GITHUB';
+%let rc=%sysfunc(dlgcdir('~'));
+options fmtsearch=(IPEDS);
+
 proc sql;
 	create table model_data as
-	select unitid, cohort, Rate,
+	select gr.unitid, cohort, Rate,
 
 	/*characteristics data*/
-	control, hloffer, locale, iclevel, 
+	iclevel, control, hloffer, locale,  
 	instcat, c21enprf, cbsatype,
 
 	/*aid data*/
-	scfa2, scfa1n, scfa11n, scfa12n,
-	scfa13n, scfa14n, uagrntn, uagrntt,
-	upgrntn, ufloann, ufloant, 
+	(uagrntn/scfa2) as GrantRate,
+	(uagrntt/scfa2) as GrantAvg,
+	(upgrntn/scfa2) as PellRate,
+	(ufloann/scfa2) as LoanRate,
+	(ufloant/scfa2) as LoanAvg,
 
 	/*cost data*/
 	tuition1, fee1, tuition2, fee2,
@@ -21,9 +28,13 @@ proc sql;
 	(scfa2/sa09mct) as StuFacRatio
 
 	from ipeds.gradrates as gr 
-	left join ipeds.characteristics as c on gr.unitid = c.unitid
-    left join ipeds.aid as a on gr.unitid = a.unitid
-    left join ipeds.tuitionandcosts as co on gr.unitid = co.unitid
-	left join ipeds.salaries as s on gr.unitid = s.unitid
+	inner join ipeds.characteristics as c on gr.unitid = c.unitid
+    inner join ipeds.aid as a on gr.unitid = a.unitid
+    inner join ipeds.tuitionandcosts as co on gr.unitid = co.unitid
+	inner join ipeds.salaries as s on gr.unitid = s.unitid
 	;
+run;
+
+proc compare base=regdata
+	compare=work.model_data;
 run;
