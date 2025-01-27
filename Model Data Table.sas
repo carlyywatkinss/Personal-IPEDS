@@ -38,3 +38,6 @@ run;
 proc compare base=regdata
 	compare=work.model_data;
 run;
+
+%include '~/Specs/Graduation Specs Generator.sas';
+/** ^^ this will run the code without actually seeing the code**/
