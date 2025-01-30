@@ -67,7 +67,8 @@ proc compare base=work.regdata
 	compare=work.model_data;
 run;
 
-/**create a model based on different variables as predictors**/
+/**create a model based on different variables as predictors...
+	FIND THE BEST MODEL**/
 proc glmselect data=model_data;
 	model Rate = iclevel control hloffer locale instcat c21enprf
 				cbsatype GrantRate GrantAvg PellRate LoanRate
@@ -81,4 +82,14 @@ proc glmselect data=model_data;
 	model Rate = cohort instcat GrantRate PellRate LoanRate
 				InStateT InStateF boardamt AvgSalary /
 	selection=stepwise stats=(AIC);
+run;
+
+proc glmselect data=model_data;
+	model Rate = cohort iclevel control hloffer locale instcat c21enprf
+				cbsatype GrantRate GrantAvg PellRate LoanRate
+				LoanAvg InDistrictT InDistrictTDiff InDistrictF InDistrictFDiff 
+				InStateT InStateF OutStateT OutStateTDiff OutStateF OutStateFDiff
+				Housing ScaledHousingCap board roomamt boardamt
+				AvgSalary StuFacRatio /
+	selection=stepwise(choose=AIC) stats=(AIC);
 run;
